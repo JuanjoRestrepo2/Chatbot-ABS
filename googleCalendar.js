@@ -3,9 +3,7 @@ const app = express();
 const df = require('dialogflow-fulfillment');
 const {google} = require('googleapis');
 
-const PORT = process.env.PORT || 5500;
-
-
+const calendarId = 'c_4a79102c4b81aeac13e14d83ab92b333ee64918b22400dde9fd6f3fe7e5c1904@group.calendar.google.com'
 const serviceAccount ={
     "client_id":"811991291325-7kgq5tps1uv6v9ik6t1t656sb30bqfve.apps.googleusercontent.com",
     "project_id":"single-shadow-293214",
@@ -15,29 +13,11 @@ const serviceAccount ={
     "client_secret":"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"
 }
 
-
-app.listen(PORT, ()=> {
-    console.log(`Server running on ${PORT}`);
+const serviceAccountAuth = new google.auth.JWT({
+    scopes: 'https://www.googleapis.com/auth/calendar'
 });
 
-app.post('/webhook', express.json(), (request, response)=>{
-    const agent = new df.WebhookClient({
-        request: request,
-        response: response
-    });
+const calendar = google.calendar('v3');
 
-
-    var intentMap = new Map();
-    const currentItent = agent.intent;
-    console.log("\nCurrent Intent Status:", currentItent);
-    if (currentItent == 'Reminder'){
-        console.log("En Reminder");
-    }
-    else if (currentItent == 'uploadFile'){
-        console.log("En Upload");
-    }
-    agent.handleRequest(intentMap);
-});
-
-
-console.log("Hola");
+const timeZone = 'America/Bogota';
+const timeZoneOffset = '-05:00';

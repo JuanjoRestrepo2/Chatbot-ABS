@@ -21,11 +21,10 @@ const drive = google.drive({
     auth: oauth2Client
 })
 
-fileName = 'RedBull.jpg'
-const filePath = path.join(__dirname, fileName)
-
-async function uploadFile(fileName, filePath){
-    try{
+async function uploadFile(fileName, filePath)
+{
+    try
+    {
         const response = await drive.files.create({
             requestBody: {
                 name: fileName,
@@ -34,20 +33,37 @@ async function uploadFile(fileName, filePath){
             media: {
                 mimeType: 'image/jpg',
                 body: fs.createReadStream(filePath)
-            }
-        })
+            },
+        });
+        
+        if (response.status == 200){
+            return true
+        }else{
+            return false
+        }
 
-        console.log(response.data)
+        //console.log(response.data)
     }catch(error){
         console.log(error.message);
     }
 }
 
-//uploadFile(fileName, filePath)
-module.exports = {
-    uploadFile
-};
-
+async function localFileExists(fileName)
+{
+    return new Promise((resolve, reject)=>{
+        fs.stat(fileName, (err, stats) => {
+            if(err){
+                if (err.code === 'ENOENT'){
+                    resolve(false);
+                } else{
+                    reject(err);
+                }
+            } else{
+                resolve(true);
+            }            
+        });
+    });
+}
 /*
 async function deleteFile(fileName, filePath){
     try{
@@ -58,3 +74,11 @@ async function deleteFile(fileName, filePath){
         console.log(error.message)
     }
 }*/
+
+
+module.exports = {
+    uploadFile,
+    localFileExists,
+    path
+};
+
