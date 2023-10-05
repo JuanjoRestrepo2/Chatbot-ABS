@@ -75,10 +75,45 @@ async function deleteFile(fileName, filePath){
     }
 }*/
 
+async function generatePublicURL(fileName){
+    try{
+        const response = await drive.files.list({
+            q: `name:='${fileName}'`,
+        });
+        if (response.data.files.length > 0){
+            const publicLinks = [];
+
+            for (const file of response.data.files){
+                 const fileId = file.id;
+                 
+                 await drive.permissions.create({
+                    fileId: fileId,
+                    requestBody: {
+                        role: 'reader',
+                        type: 'anyone',
+                    },
+                 });
+                 const result = await drive.files.get({
+                    fileId: fileId,
+                    fields: 'webViewLink, webContentLink',
+                 });
+                 publicLinks.push(result.data);
+            }
+
+            return publicLinks;
+        }else{
+            return `No se encontraron archivos con el nombre '${fileName}'.`;
+        }
+    } catch (error){
+        console.error(error.message);
+        return 'Ocurrió un error al generar los enlaces públicos.';
+    }
+}
 
 module.exports = {
     uploadFile,
     localFileExists,
+    generatePublicURL,
     path
 };
 
